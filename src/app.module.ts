@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,32 +9,62 @@ import { Role } from './user/entities/role.entity';
 import { Permission } from './user/entities/permission.entity';
 import { RedisModule } from './redis/redis.module';
 import { EmailModule } from './email/email.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { LoginGuard } from './login.guard';
+import { PermissionGuard } from './permission.guard';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forRoot({
-            type: 'mysql',
-            host: process.env.DATEBASE_HOST,
-            port: 3308,
-            username: process.env.DATEBASE_USER,
-            password: process.env.DATEBASE_PASSWORD,
-            database: 'meeting_room_booking_system',
-            synchronize: true,
-            logging: true,
-            entities: [User, Role, Permission],
-            poolSize: 10,
-            connectorPackage: 'mysql2',
-            extra: {
-                authPlugin: 'sha256_password',
-            },
-        }),
-        UserModule,
-        RedisModule,
-        EmailModule,
-    ],
-    controllers: [AppController],
-    providers: [AppService],
+  imports: [
+    JwtModule.registerAsync({
+      global: true,
+      useFactory(configService: ConfigService) {
+        return {
+          secret: configService.get('JWT_SECRET'),
+          signOptions: {
+            expiresIn: '30m',
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: 'src/.env' }),
+    TypeOrmModule.forRootAsync({
+      useFactory(configService: ConfigService) {
+        return {
+          type: 'mysql',
+          host: configService.get('MYSQL_SERVER_HOST'),
+          port: configService.get('MYSQL_SERVER_PORT'),
+          username: configService.get('MYSQL_SERVER_USERNAME'),
+          password: configService.get('MYSQL_SERVER_PASSWORD'),
+          database: configService.get('MYSQL_SERVER_DATABASE'),
+          synchronize: true,
+          logging: true,
+          entities: [User, Role, Permission],
+          poolSize: 10,
+          connectorPackage: 'mysql2',
+          extra: {
+            authPlugin: 'sha256_password',
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
+    UserModule,
+    RedisModule,
+    EmailModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: LoginGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
 })
 export class AppModule {}
