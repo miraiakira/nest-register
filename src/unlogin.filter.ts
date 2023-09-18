@@ -3,15 +3,13 @@ import {
   Catch,
   ExceptionFilter,
   HttpStatus,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
-export class UnloginException extends UnauthorizedException {
+export class UnloginException {
   message: string;
 
-  constructor(message?: string) {
-    super(message);
+  constructor(message?) {
     this.message = message;
   }
 }
@@ -20,7 +18,6 @@ export class UnloginException extends UnauthorizedException {
 export class UnloginFilter implements ExceptionFilter {
   catch(exception: UnloginException, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
-    response.statusCode = exception.getStatus();
     response
       .json({
         code: HttpStatus.UNAUTHORIZED,
