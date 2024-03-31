@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import * as path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -32,7 +33,11 @@ import { Booking } from './booking/entities/booking.entity';
       },
       inject: [ConfigService],
     }),
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: 'src/.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // envFilePath: 'src/.env',
+      envFilePath: path.join(__dirname, '.env.prod'),
+    }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
         return {
