@@ -13,6 +13,7 @@ import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { generateParseIntPipe } from 'src/utils';
+import { UserInfo } from 'src/custom.decorator';
 
 @Controller('booking')
 export class BookingController {
@@ -43,6 +44,15 @@ export class BookingController {
       bookingTimeRangeStart,
       bookingTimeRangeEnd,
     );
+  }
+
+  @Post('add')
+  async add(
+    @Body() booking: CreateBookingDto,
+    @UserInfo('userId') userId: number,
+  ) {
+    await this.bookingService.add(booking, userId);
+    return 'success';
   }
 
   @Post()

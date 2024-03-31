@@ -18,6 +18,8 @@ import { MeetingRoomModule } from './meeting-room/meeting-room.module';
 import { MeetingRoom } from './meeting-room/entities/meeting-room.entity';
 import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
+import { StatisticService } from './statistic/statistic.service';
+import { StatisticController } from './statistic/statistic.controller';
 
 @Module({
   imports: [
@@ -65,7 +67,7 @@ import { Booking } from './booking/entities/booking.entity';
     MeetingRoomModule,
     BookingModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StatisticController],
   providers: [
     AppService,
     {
@@ -76,6 +78,7 @@ import { Booking } from './booking/entities/booking.entity';
       provide: APP_GUARD,
       useClass: PermissionGuard,
     },
+    StatisticService,
   ],
 })
 export class AppModule {}
