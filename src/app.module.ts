@@ -38,7 +38,7 @@ import { StatisticController } from './statistic/statistic.controller';
     ConfigModule.forRoot({
       isGlobal: true,
       // envFilePath: 'src/.env',
-      envFilePath: path.join(__dirname, '.env.prod'),
+      envFilePath: path.join(__dirname, '.prod.env'),
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
