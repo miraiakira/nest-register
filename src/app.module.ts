@@ -20,6 +20,8 @@ import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
 import { StatisticService } from './statistic/statistic.service';
 import { StatisticController } from './statistic/statistic.controller';
+import { MinioModule } from './minio/minio.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -37,8 +39,8 @@ import { StatisticController } from './statistic/statistic.controller';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: 'src/.env',
-      envFilePath: path.join(__dirname, '.prod.env'),
+      envFilePath: 'src/.env',
+      // envFilePath: path.join(__dirname, '.prod.env'),
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
@@ -66,6 +68,8 @@ import { StatisticController } from './statistic/statistic.controller';
     EmailModule,
     MeetingRoomModule,
     BookingModule,
+    MinioModule,
+    AuthModule,
   ],
   controllers: [AppController, StatisticController],
   providers: [
