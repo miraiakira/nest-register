@@ -8,8 +8,11 @@ import {
   Inject,
   Post,
   Query,
+  Req,
+  Res,
   UnauthorizedException,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -36,6 +39,9 @@ import { LoginUserVo } from './vo/login-user.vo';
 import { RefreshTokenVo } from './vo/refresh-token.vo';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from 'src/my-file-storage';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from './entities/user.entity';
+import { Response } from 'express';
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -110,9 +116,9 @@ export class UserController {
     description: '用户信息和 token',
     type: LoginUserVo,
   })
+  @UseGuards(AuthGuard('local'))
   @Post('login')
-  async userLogin(@Body() loginUser: LoginUserDto) {
-    const vo = await this.userService.login(loginUser, false);
+  async userLogin(@UserInfo() vo: LoginUserVo) {
     vo.accessToken = this.jwtService.sign(
       {
         userId: vo.userInfo.id,
@@ -236,6 +242,71 @@ export class UserController {
     } catch (e) {
       throw new UnauthorizedException('token 已失效，请重新登录');
     }
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('callback/google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req, @Res() res: Response) {
+    if (!req.user) {
+      throw new BadRequestException('google 登陆失败');
+    }
+    let user: User = null;
+    const foundUser = await this.userService.findUserByEmail(req.user.email);
+    if (foundUser) user = foundUser;
+    else {
+      user = await this.userService.registerByGoogleInfo(
+        req.user.email,
+        req.user.firstName + ' ' + req.user.lastName,
+        req.user.picture,
+      );
+    }
+
+    const v0 = new LoginUserVo();
+    v0.userInfo = {
+      id: user.id,
+      username: user.username,
+      nickName: user.nickName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      headPic: user.headPic,
+      createTime: user.createTime.getTime(),
+      isFrozen: user.isFrozen,
+      isAdmin: user.isAdmin,
+      roles: [],
+      permissions: [],
+    };
+    v0.accessToken = this.jwtService.sign(
+      {
+        userId: v0.userInfo.id,
+        username: v0.userInfo.username,
+        email: v0.userInfo.email,
+        roles: v0.userInfo.roles,
+        permissions: v0.userInfo.permissions,
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_access_token_expires_time') || '30m',
+      },
+    );
+    v0.refreshToken = this.jwtService.sign(
+      {
+        userId: v0.userInfo.id,
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_refresh_token_expires_time') || '7d',
+      },
+    );
+
+    res.cookie('userInfo', JSON.stringify(v0.userInfo));
+    res.cookie('accessToken', v0.accessToken);
+    res.cookie('refreshToken', v0.refreshToken);
+
+    res.redirect('http://localhost:3000');
   }
 
   @ApiQuery({

@@ -79,4 +79,17 @@ export class User {
     name: 'user_roles',
   })
   roles: Role[];
+
+  @Column({
+    type: 'int',
+    comment: '登陆类型，0 用户名密码登陆， 1 Google 登陆， 2 Github 登陆',
+    default: 0,
+  })
+  loginType: LoginType;
+}
+
+export enum LoginType {
+  USERNAME_PASSWORD = 0,
+  GOOGLE = 1,
+  GITHUB = 2,
 }
