@@ -20,6 +20,7 @@ import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
 import { StatisticService } from './statistic/statistic.service';
 import { StatisticController } from './statistic/statistic.controller';
+import { MinioModule } from './minio/minio.module';
 
 @Module({
   imports: [
@@ -49,7 +50,7 @@ import { StatisticController } from './statistic/statistic.controller';
           username: configService.get('MYSQL_SERVER_USERNAME'),
           password: configService.get('MYSQL_SERVER_PASSWORD'),
           database: configService.get('MYSQL_SERVER_DATABASE'),
-          synchronize: true,
+          synchronize: false,
           logging: true,
           entities: [User, Role, Permission, MeetingRoom, Booking],
           poolSize: 10,
@@ -66,6 +67,7 @@ import { StatisticController } from './statistic/statistic.controller';
     EmailModule,
     MeetingRoomModule,
     BookingModule,
+    MinioModule,
   ],
   controllers: [AppController, StatisticController],
   providers: [
