@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import * as path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -21,6 +20,7 @@ import { Booking } from './booking/entities/booking.entity';
 import { StatisticService } from './statistic/statistic.service';
 import { StatisticController } from './statistic/statistic.controller';
 import { MinioModule } from './minio/minio.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -38,8 +38,8 @@ import { MinioModule } from './minio/minio.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: 'src/.env',
-      envFilePath: path.join(__dirname, '.prod.env'),
+      envFilePath: 'src/.env',
+      // envFilePath: path.join(__dirname, '.prod.env'),
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
@@ -68,6 +68,7 @@ import { MinioModule } from './minio/minio.module';
     MeetingRoomModule,
     BookingModule,
     MinioModule,
+    AuthModule,
   ],
   controllers: [AppController, StatisticController],
   providers: [

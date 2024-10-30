@@ -16,6 +16,8 @@ import { ConfigService } from '@nestjs/config';
             port: configService.get('REDIS_SERVER_PORT'),
           },
           database: configService.get('REDIS_SERVER_DB'),
+          username: configService.get('REDIS_USER'), // 设置用户名
+          password: configService.get('REDIS_PWD'),
         });
         await client.connect();
         return client;
