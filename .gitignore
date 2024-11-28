@@ -38,7 +38,7 @@ lerna-debug.log*
 .env
 .prod.env
 .env-migration
-.dev.env
+.env.dev
 
 # storage
 /uploads

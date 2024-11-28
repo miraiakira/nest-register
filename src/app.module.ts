@@ -1,4 +1,3 @@
-import * as path from 'node:path';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -39,11 +38,11 @@ import { AuthModule } from './auth/auth.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: 'src/.env',
-      envFilePath: [
-        path.join(__dirname, '.dev.env'),
-        path.join(__dirname, '.env'),
-      ],
+      envFilePath: 'src/.env',
+      // envFilePath: [
+      //   // path.join(__dirname, '.env.dev'),
+      //   path.join(__dirname, '.env'),
+      // ],
     }),
     TypeOrmModule.forRootAsync({
       useFactory(configService: ConfigService) {
@@ -54,7 +53,7 @@ import { AuthModule } from './auth/auth.module';
           username: configService.get('MYSQL_SERVER_USERNAME'),
           password: configService.get('MYSQL_SERVER_PASSWORD'),
           database: configService.get('MYSQL_SERVER_DATABASE'),
-          synchronize: false,
+          synchronize: true,
           logging: true,
           entities: [User, Role, Permission, MeetingRoom, Booking],
           poolSize: 10,
